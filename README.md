@@ -104,3 +104,7 @@ broken one. It reads only — nothing is written to the world.
 ## License
 
 MIT.
+
+## Get help
+
+[Get Help](https://github.com/Spazzletopia-Studios/spazzmods-support) — report a bug, get install help, ask a question, or suggest an idea.
