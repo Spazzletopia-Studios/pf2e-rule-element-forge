@@ -1,118 +1,53 @@
 # PF2e Rule Element Forge
 
-Builds a proper form for every pf2e rule element, right on the item sheet's
-Rules tab — no more hand-writing raw JSON to make a rule work.
+## Purpose and features
 
-## Install
+Rule Element Forge gives item authors a form editor for PF2e rule elements. It reads the rule element schemas from the installed PF2e system, builds a predicate editor, validates drafts, and can load working examples from compendiums.
 
-**The easy way (Windows):** download the [SpazzMods Installer](https://github.com/Spazzletopia-Studios/spazzmods-installer/releases/latest),
-run it, and click Install on PF2e Rule Element Forge. No account needed.
+## Setup
 
-**Without the installer:** paste this into Foundry's **Install Module →
-Manifest URL** box:
-`https://github.com/Spazzletopia-Studios/pf2e-rule-element-forge/releases/latest/download/module.json`
+Foundry VTT 13 with PF2e 7.12.2 or newer 7.x, or Foundry VTT 14 with PF2e 8.x. The manifest sets Foundry minimum 13 and maximum 14; it was verified with PF2e 8.5.0.
 
-## Using it
+This is a free module. Install it with the [SpazzMods Installer](https://github.com/Spazzletopia-Studios/spazzmods-installer/releases/latest), or use the [public GitHub release](https://github.com/Spazzletopia-Studios/pf2e-rule-element-forge/releases/latest). Enable **PF2e Rule Element Forge** in Manage Modules.
 
-- Open any item's **Rules** tab. Next to every existing rule, and next to
-  the **New** button, there is a wand icon — click it.
-- The window builds a real form for whatever rule element you picked, with
-  every field it actually takes, instead of a raw JSON box.
-- Predicates (the conditions that gate a rule) get their own builder with
-  rows you fill in, instead of hand-written logic.
-- The draft is checked as you edit, and the **Apply** button stays disabled
-  until the rule is valid — so you cannot save something broken.
-- Stuck on what values to use? Search the compendiums for a real item using
-  the same rule element and load it as a starting point.
+You need permission to edit the item, and the PF2e **Rules** tab must be visible to your role. PF2e controls the minimum role for that tab.
 
----
+## Quick start
 
-A form editor for every pf2e rule element, on the item sheet's Rules tab.
+1. Open an editable item sheet and select **Rules**.
+2. Click the wand next to **New** to make a rule, or the wand on an existing rule to edit it.
+3. Choose the rule element type. Add values with the form and build any predicate rows.
+4. Check the live validation messages and use **Examples** to find a real compendium item if needed.
+5. Click **Apply** when the rule is valid.
 
-Replaces the **PF2e Rule Element Generator** by Bolt, which stopped being
-maintained in September 2022 and no longer works: it was written for Foundry v10
-and hooks DOM elements (`a.edit-rule-element`, `a.add-rule-element`) that pf2e
-removed several majors ago, so on a current install it shows no buttons at all.
+## Detailed use
 
-## What it does
+The editor reads each field from the live PF2e rule-element schema. It includes a predicate builder for roll options, negation, groups, comparisons, and if/then conditions. Roll-option suggestions come from the actor and item. The draft is checked by the installed PF2e rule class; **Apply** stays unavailable while it is invalid.
 
-Open any item's **Rules** tab. Next to every existing rule, and next to the
-**New** button, there is a wand. It opens a window with:
+The example search looks for compendium items that use the selected rule. Examples are starting points, not a guarantee that the rule will work on every actor or item. PF2e still evaluates the saved rule.
 
-- **A form built from the live schema.** Every pf2e rule element is a Foundry
-  DataModel with a declared schema, and this reads that schema at runtime. All
-  40 rule elements (the same 40 in pf2e 7.12.2 and 8.x) get a form, including the 26 that pf2e itself
-  only offers as a raw JSON box. Nothing is hardcoded, so a pf2e update that
-  adds a rule element or changes a field needs no update here.
-- **A predicate builder.** Rows for roll options, `not`, groups (`and`, `or`,
-  `nand`, `nor`, `xor`, `iff`), numeric comparisons (`eq`, `gt`, `gte`, `lt`,
-  `lte`) and `if`/`then`, nested to any depth. The roll-option boxes autocomplete
-  from the item's and the actor's real roll options — the same list pf2e's own
-  "View Roll Options" button shows.
-- **Live validation.** The draft is run through the actual pf2e rule element
-  class on every edit and any validation failure is shown before you save. Apply
-  stays disabled until the rule is valid.
-- **Examples from the compendiums.** Search real pf2e items that use the rule
-  element you are editing and load one as a starting point.
-
-## Requirements
-
-- Foundry VTT 13 with the pf2e system 7.12.2 (the 7.x version this release was
-  tested with), or Foundry VTT 14 with pf2e 8.x (tested with 8.5.0). Both lines
-  register the same 40 rule elements; the fields of each form are the ones your
-  installed pf2e declares.
-- The Rules tab must be visible to you — pf2e gates it behind the
-  **Minimum Role for Rules UI** system setting.
+When you edit a rule, Forge works with the item's source data, not PF2e's prepared rule objects. It preserves untouched defaults, structured values, and keys unknown to the installed schema. Predicates are saved in the modern array format. The editor does not grant permission to edit the item or bypass PF2e's Rules-tab role limit.
 
 ## Settings
 
-| Setting | Scope | Default |
-| --- | --- | --- |
-| Block Apply while a rule is invalid | world | on |
-| Expand advanced fields by default | client | off |
-| Compendiums searched for examples | world | six pf2e SRD packs |
+- **Block Apply while a rule is invalid** — world, on by default.
+- **Expand advanced fields by default** — client, off by default.
+- **Compendiums searched for examples** — world, six PF2e SRD packs by default.
 
-## API
+## Limits and recovery
 
-```js
-game.pf2eRuleElementForge.open(item, { index: null, key: "FlatModifier" });
-game.pf2eRuleElementForge.keys();
-```
+A valid form only proves the draft passes the installed rule-element validator. Review the item's behavior in PF2e and test it on the intended actor. If the Rules tab or wand controls are absent, check item ownership/edit permission and the PF2e minimum role setting. Some keys are not declared by the installed schema; Forge preserves them when editing the existing rule but does not show an editable field for them.
 
-`item` may be a document or a UUID. `index` selects an existing rule to edit;
-omit it to build a new one.
+## API and development
 
-## Checking it works
+`game.pf2eRuleElementForge.open(item, { index: null, key: "FlatModifier" })` opens a new rule editor. `game.pf2eRuleElementForge.keys()` lists supported rule keys. Pass a document or UUID; use `index` to edit an existing rule.
 
-With a world loaded, paste this into the browser console (F12):
+A read-only in-world smoke is available at `/modules/pf2e-rule-element-forge/scripts/smoke.js`. The harness gate can be run with `node run-all.mjs` from the module's `harness/` directory.
 
-```js
-(await import("/modules/pf2e-rule-element-forge/scripts/smoke.js")).run()
-```
+## Credits and license
 
-It walks every rule element the installed pf2e has, builds and renders each
-form (a field that fell back to a JSON box is reported), checks the validator
-rejects a bad `priority` for every one of them, and checks it accepts a
-known-good rule and rejects broken ones. It reads only — nothing is written to
-the world.
-
-## Notes
-
-- Rules are read from and written to the item **source** (`item.toObject()`),
-  never the prepared `item.system.rules`, so applying a rule cannot corrupt the
-  item with system-built objects.
-- Opening an existing rule and pressing Apply writes back exactly that rule.
-  A schema default shown in a control you did not touch is not written, an
-  object or list in a value box is kept as written, and a key your PF2e version
-  has no field for is kept as written too (since 1.1.0).
-- Predicates are written in the modern array form. The module this replaces
-  emitted the pre-4.x `{ all, any, not }` object, which today fails validation
-  on every rule it writes.
-
-## License
-
-MIT.
+MIT License. Author: Spazz. This module replaces the obsolete PF2E Rule Element Generator.
 
 ## Get help
 
-[Get Help](https://github.com/Spazzletopia-Studios/spazzmods-support) — report a bug, get install help, ask a question, or suggest an idea.
+[SpazzMods Support](https://github.com/Spazzletopia-Studios/spazzmods-support).
